@@ -1,8 +1,21 @@
-var bombWeight = 0.20;
+//Globals because i cannot code well
+var bombWeight = 0;
 var pGridx = 10;
 var pGridy = 10;
 var playGrid = [];
+var numSel = 1;
+var table = document.getElementById('main');
 
+/*
+* 7/14 - Be able to input full array -> try to solve
+* 7/25 - Feature idea-> Step by step guess recommendation (in waves), give percentage chance of the safety of a guess
+
+7/26 - do the 1-1-1 pattern thing that takes effort
+*/
+
+
+
+//Backend
 //class for squares
 class Land {
 
@@ -11,52 +24,35 @@ class Land {
     this.x = x;
     this.y = y;
     this.neighbours = [];
-    this.number = -1;
+    this.number = -1; 
+    //Number Clarification
+    /*
+      -1 -> unguessed
+      -2 -> Flag
+      -8 -> Bomb
+    */
     this.bomb = generateBomb(bombWeight);
+    this.safetyPercent //Chance of a safe guess
     this.flagged = false;
+    this.guessable = false;
     this.visible = false;
   }
 
   //Methods!
 
-
+  
   //visible + finds number
   setVisible() {
     this.visible = true;
-    this.getNumber();
   }
 
   //updates Neighbours
   update() {
     this.neighbours = getNeighbours(this);
-    this.getNumber();
-  }
-
-  //gets number based on neighbour array
-  getNumber() {
-    
-    if (this.flagged == true) {
-      this.number = -2;
-    } else if (this.bomb == true) {
-      this.number = -8;
-
-    } else {
-
-      let counter = 0;
-
-      for (i = 0; i < this.neighbours.length; i++) {
-        if (this.neighbours[i].bomb === true) {
-          counter++;
-        }
-      }
-
-      this.number = counter;
-    }
-
   }
 
 
-  //Gets adj property in neighbours
+  //Gets array of adjacent lands w/ specific property
   getAdjProperty(prop) {
 
 
@@ -109,13 +105,9 @@ class Land {
   //guesses
   guess() {
 
-    this.setVisible();
-
-    if (this.bomb == true) {
-      //lose();
-      console.log('Lose');
-    }
-
+    this.guessable = true;
+    this.visible = true;
+    /* Flood Solve for 0
     for (let i = 0; i < this.neighbours.length; i++) {
 
       this.neighbours[i].update();
@@ -129,7 +121,9 @@ class Land {
         }
 
       }
+      
     }
+    */
   }
 
 
@@ -149,12 +143,8 @@ class Land {
       this.number = -8;
     }
   }
-
-
+  
 }
-
-
-
 
 
 //functions
@@ -165,11 +155,11 @@ function setGrid(xn, yn) {
   tGrid = [];
 
 
-  for (i = 0; xn > i; i++) {
+  for (j = 0; yn > j; j++) {
 
     yGrid = [];
 
-    for (j = 0; yn > j; j++) {
+    for (i = 0; xn > i; i++) {
 
       yGrid.push(new Land(i, j));
 
@@ -182,12 +172,10 @@ function setGrid(xn, yn) {
   return tGrid;
 }
 
-
-function importGrid(xn, yn, ){
-
+//do this later sometime idk
+function importGrid(xn, yn, array){
+  
 }
-
-
 
 //Returns array 
 function getNeighbours(land) {
@@ -212,7 +200,7 @@ function getNeighbours(land) {
 
       } else if (((tX >= 0) && (tY >= 0)) && ((tX < pGridx) && (tY < pGridy))) {
 
-        tGrid.push(playGrid[tX][tY]);
+        tGrid.push(playGrid[tY][tX]);
         //console.log("works" + tX + " " + tY);
 
       } else if ((tX < 0) || (tY < 0)) {
@@ -232,8 +220,6 @@ function getNeighbours(land) {
   return tGrid;
 }
 
-
-
 //generates bomb chance
 function generateBomb() {
 
@@ -245,20 +231,18 @@ function generateBomb() {
 
 }
 
-
 //updates all
 function updateAll(grid) {
 
   for (let i = 0; i < (pGridx); i++) {
     for (let j = 0; j < (pGridy); j++) {
 
-      grid[i][j].update();
+      grid[j][i].update();
 
     }
   }
 
 }
-
 
 //sets up board so first guess opens
 function firstGuessSetup(x, y) {
@@ -276,94 +260,53 @@ function firstGuessSetup(x, y) {
 }
 
 
+//Base function, fills grid with -1's
+function populateTable(x, y){
 
+    
+  for (let j = 0; y > j; j++) { //javascript scope sucks make sure these are 'let'
+  
+    let tr = document.createElement('tr');
+   
+      for (let i = 0; x > i; i++) {
 
+        
+        bButton = document.createElement('input'); //button is made
+        //bButton.disabled = true;
+        bButton.contentEditable = true;
+        bButton.id = i + "," + j;
+        bButton.className = "grid";
 
-//visualizers
-
-//true visualizer in console.log
-function budgetTrueVisualizer(grid) {
-  console.log("Budget True Visualizer");
-  console.log();
-
-  updateAll(playGrid);
-  for (let i = 0; i < (pGridx); i++) {
-
-    let line = "";
-
-    for (let j = 0; j < (pGridy); j++) {
-
-      grid[i][j].getNumber();
-      grid[i][j].reveal();
-
-      switch (grid[i][j].number) {
-        case -1:
-          line = line + '  -';
-          break;
-        case -2:
-          line = line + '  🚩';
-          break;
-        case -8:
-          line = line + '  💣';
-          break;
-        default:
-          line = line + '  ' + grid[i][j].number;
-          break;
+        bButton.style.background = "rgb(24, 25, 28)";
+        bButton.addEventListener("click", () => {
+          document.getElementById(i+","+j).focus();
+          document.getElementById(i+","+j).select();
+          //console.log("focus works");
+        });
+        //bButton.addEventListener("mouseover", function(){});
+        //bButton.addEventListener("mouseout", function(){});
+        bButton.textColor = 'white';
+        //bButton.value = "-1"
+        bButton.textContent = "";
+        tr.appendChild(bButton);
+    
+            
       }
-
-    }
-
-    console.log(line);
-
+    
+    table.appendChild(tr); //row to table 
+   
   }
-
-  console.log();
-
+  
 }
 
-//visualizer is console.log()
-function budgetVisualizer(grid) {
-
-  console.log("Budget Visualizer");
-  console.log();
-  updateAll(playGrid);
-
-  for (let i = 0; i < (pGridx); i++) {
-
-    let line = "";
-
-    for (let j = 0; j < (pGridy); j++) {
-
-      if (grid[i][j].visible === true) {
-
-        switch (grid[i][j].number) {
-          case -1:
-            line = line + '  -';
-            break;
-          case -2:
-            line = line + '  🚩';
-            break;
-          case -8:
-            line = line + '  💣';
-            break;
-          default:
-            line = line + '  ' + grid[i][j].number;
-        }
-
-      } else {
-
-        line = line + '  -';
-
-      }
-    }
-
-    console.log(line);
-
-  }
-
-  console.log();
-
+function selectText(i, j) {
+  let input = document.getElementById(i + "," + j);
+  input.focus();
+  input.select();
 }
+
+
+
 
 
 //solvers
@@ -373,7 +316,6 @@ function budgetVisualizer(grid) {
 function solve(grid) {
 
   scrape(grid);
-
 
 }
 
@@ -398,23 +340,23 @@ function scrape(grid) {
   let scraped = false;
 
 
+
   while(i < set.length) {
     let wSqr = set[i];
 
     //print test value
-    //console.log("Test: x-" + wSqr.y + " y-" + wSqr.x);
-    //console.log("value - " +  wSqr.number + " adj empty - " + //wSqr.getAdjProperty('e').length + " adj flagged - " + wSqr.getAdjProperty('f').length );
-
+    console.log("Test: x-" + wSqr.x + " y-" + wSqr.y);
+    console.log("value - " +  wSqr.number + " adj empty - " + wSqr.getAdjProperty('e').length + " adj flagged - " + wSqr.getAdjProperty('f').length );
 
 
     //flag if
-    if (wSqr.number == (wSqr.getAdjProperty('e').length + wSqr.getAdjProperty('f').length)){
+    if (wSqr.number == (wSqr.getAdjProperty('e').length +   wSqr.getAdjProperty('f').length)){
      
       for (let l of wSqr.getAdjProperty('e')){
         l.flag();
         scraped = true;
       
-        // console.log("flagged: x-" + l.y + " y-" + l.x);
+        console.log("flagged: x-" + l.x + " y-" + l.y);
       }
 
   //guess if
@@ -423,7 +365,8 @@ function scrape(grid) {
      for (let l of wSqr.getAdjProperty('e')){
        l.guess();
        scraped = true;
-        //console.log("guessed: x-" + l.y + " y-" + l.x);
+
+        console.log("guessed: x-" + l.x + " y-" + l.y);
      }   
    }
 
@@ -431,43 +374,33 @@ function scrape(grid) {
     // console.log();
     i++;
     set = getOpenSet(grid);
+    superPosSearch(set);
   }
 
-  if (scraped == true){
-    budgetVisualizer(playGrid);
+  if (scraped){
     scrape(grid);
   } else {
-    budgetVisualizer(playGrid);
     return false;
   }
 
 }
 
-//upper level solve
-function shoopSolve(grid) {
 
-}
-
-//rng probability solver? idk how this is going to work man
-function jesusSolve() {
-
-}
-
-//Gets open lands 
+//Gets open lands (hidden lands adjacent to visible lands )
 function getOpenSet(grid) {
 
   let openSet = [];
   for (let i = 0; i < (pGridx); i++) {
     for (let j = 0; j < (pGridy); j++) {
 
-      if (grid[i][j].visible == true) {
+      if ((grid[j][i].visible == true)&&(grid[j][i].flagged == false)&&(grid[j][i].guessable == false)) {
 
-        for (let k = 0; k < grid[i][j].neighbours.length; k++) {
+        for (let k = 0; k < grid[j][i].neighbours.length; k++) {
 
-          grid[i][j].neighbours[k].update();
+          grid[j][i].neighbours[k].update();
 
-          if (grid[i][j].neighbours[k].visible == false) {
-            openSet.push(grid[i][j]);
+          if (grid[j][i].neighbours[k].visible == false) {
+            openSet.push(grid[j][i]);
             break;
           }
 
@@ -482,23 +415,50 @@ function getOpenSet(grid) {
 
 
 
-//superpositions smaller set and tries to solve
+//superpositions smaller set into bigger set as a number and tries to solve (need to recomment this is so messy)
 function superPos(bLand, sLand){
   let wArr = [];
 
-  //if small neighbours all in big neighbours
-  if (sLand.getAdjProperty('e').every(n => bLand.getAdjProperty('e').includes(n))){
-
+  
+  if(bLand.getAdjProperty('e').length < sLand.getAdjProperty('e').length){
+    
+   superPos(sLand, bLand);
+   
+  } else if (sLand.getAdjProperty('e').every(n => bLand.getAdjProperty('e').includes(n))){  //if small neighbours all in big neighbours
+    //console.log("small in big");
     //set work array to be big neighbours minus small neighbours
+    
     wArr = bLand.getAdjProperty('e').filter(l => !sLand.getAdjProperty('e').includes(l));
-
-    if (wArr.length == (bLand.number  - bLand.getAdjProperty('f').length) - (sLand.number - sLand.getAdjProperty('f').length)){
-      wArr.forEach(x => x.flag);
+    //console.log("filter s in b empties");
+  
+    if (wArr.length == (bLand.number - bLand.getAdjProperty('f').length) - (sLand.number - sLand.getAdjProperty('f').length)){ //flag if the effective big number - effective small number is the same as remaining open squares 
+      wArr.forEach(x => {x.flag(); console.log("flagged " + x.x + "," + x.y)});
     } 
-    /*else if (wArr.length == (bLand.number  - bLand.getAdjProperty('f').length) - (sLand.number - sLand.getAdjProperty('f').length)){
-      wArr.forEach(x => x.flag);
-    }*/
-  }
+    else if ((bLand.number  - bLand.getAdjProperty('f').length) - (sLand.number - sLand.getAdjProperty('f').length) == 0){
+      wArr.forEach(x => {x.guess(); console.log("guessed " + x.x + "," + x.y)} );//guess if effective big number - effective small number is smaller than remaining squares
+    }
+    //check test if big and small are swapped
+  } 
+  
+  
+  //test case for vertical 1 - 1 - 1, or 1 - 2 - 1
+  //superPos(playGrid[1][0],playGrid[0][0]); scrape(playGrid); webViewUpdate();
+}
+
+
+function superPosSearch(set){
+  let i = 0;
+  
+  while(i < set.length){
+
+    if(set[i].number > 0){
+      set[i].getAdjProperty('v').filter(n => n.number > 0).forEach(n => {superPos(set[i], n); console.log("SUPERPOS " + set[i].x + "," + set[i].y + " | "+ n.x + ',' + n.y)});
+    }
+    
+    i++;      
+    }
+
+
 }
 
 //checks if solved
@@ -521,6 +481,32 @@ function solved(grid){
 
 }
 
+function fillZeros(){
+
+  let zeroed = false;
+
+  playGrid = pullGrid(pGridx, pGridy);
+  updateAll(playGrid);
+  
+  for (let i = 0; i < (pGridx); i++) {
+    for (let j = 0; j < (pGridy); j++) {
+
+      if ((playGrid[j][i].number == 0)&&(playGrid[j][i].getAdjProperty('e').length > 0)){
+
+          playGrid[j][i].getAdjProperty('e').forEach(n => {n.number = 0; document.getElementById(n.x + ","+ n.y).value = 0;});
+          zeroed = true;
+      }
+    }
+  }
+
+  if (zeroed == true){
+    fillZeros();    
+  }
+
+
+  
+}
+
 //input own playGrid
 
 function getWorkingGrid(l, w, array) {
@@ -528,6 +514,7 @@ function getWorkingGrid(l, w, array) {
   let arr = array;
   let tGrid = setGrid(l, w);
 
+  //resets all squares
   for (let i = 0; i < l; i++) {
     for (let j = 0; j < w; j++) {
 
@@ -564,46 +551,114 @@ function getWorkingGrid(l, w, array) {
   return tGrid;
 }
 
+function waveSolve(){
+  playGrid = pullGrid(pGridx, pGridy);
+  updateAll(playGrid);
+  scrape(playGrid);
+  scrape(playGrid);
+  webViewUpdate();
+}
 
-//
-let array31 = [
-  [0,0,'b','i'],
-  [1,0,'b','i'],
-  [0,1,3,'v'],
-  [0,2,1,'v']
-];
+function sleep(milliseconds) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
 
+//Web Visualizer Setup
+function webViewSetup(){
+  
+  //switch after
+  pGridy = document.getElementById("hin").value;
+  pGridx = document.getElementById("win").value;
+  document.getElementById('main').innerHTML = '';
+  populateTable(pGridx, pGridy);
+
+}
+
+
+function randomSetup(x, y){
+  
+  let tGrid = setGrid(x,y);
+  
+  for (let i = 0; i < (pGridx); i++) {
+    for (let j = 0; j < (pGridy); j++) {
+
+      //grid[i][j]
+
+    }
+  }
+
+}
+
+
+
+
+
+function pullGrid(xn, yn){
+
+  console.log("Grid")
+  tGrid = [];
+
+  for (j = 0; yn > j; j++) {
+
+    yGrid = [];
+
+    for (i = 0; xn > i; i++) {
+
+      let pLand = new Land(i, j); //create temporary land to be imported
+      pLand.number = parseInt(document.getElementById(i +"," +j).value);
+
+      if(pLand.number >= 0){
+        pLand.value = pLand.number;
+        pLand.visible = true;
+      } 
+
+      if(pLand.number == -2){
+        pLand.flag();
+      }
+      
+      console.log(pLand);
+      yGrid.push(pLand);
+
+    }
+    
+    tGrid.push(yGrid);
+
+  }
+  
+  return tGrid; 
+
+}
+
+
+
+function webViewUpdate(){
+  
+  for (let i = 0; i < (pGridx); i++) {
+    for (let j = 0; j < (pGridy); j++) {
+      
+      if (playGrid[j][i].flagged == true){
+        
+        document.getElementById(i+","+j).style.backgroundColor = "red";
+        
+      } else if (playGrid[j][i].guessable == true){
+        
+        document.getElementById(i+","+j).style.backgroundColor = "green";
+        
+      } else {
+        
+        document.getElementById(i+","+j).style.backgroundColor = "#18191C";
+      }
+      
+      
+    }
+  }
+}
 
 //main
 
-//playGrid = setGrid(pGridx, pGridy);
-firstGuessSetup(Math.floor(pGridx / 2), Math.floor(pGridy / 2));
-//playGrid = getWorkingGrid(2, 1, array31);
+webViewSetup();
 
-
-updateAll(playGrid);
-budgetVisualizer(playGrid);
-console.log();
-scrape(playGrid);
-budgetTrueVisualizer(playGrid);
-console.log("Solution: " + solved(playGrid));
-
-
-//scrape(playGrid);
-//budgetVisualizer(playGrid);
-//console.log();
-//console.log(playGrid);
-//console.log(getOpenSet(playGrid));
-//console.log();
-
-//budgetVisualizer(playGrid);
-//getNeighbours(playGrid[0][0]);
-//console.log(playGrid[1][1].neighbours)
-//playGrid[1][1].setVisible();
-
-/*
-
-[{1, 2, 3},
-{3, 2, 1},
-{2, 4, 1}]
-*/

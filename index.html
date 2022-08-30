@@ -5,19 +5,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
   <link href="dark-sakura.css" rel="stylesheet" type="text/css" />
+  <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
+  
+  <div id = "ddown" class = "dropdown">
+    <label id = "settings">Settings</label>
 
-  <h1>Minesweeper Solver!</h1>
-  <h3>Grid Setup</h3>
-  <div>  
-    <button>Generate Grid</button>
-    <button>Input Grid</button>
+    <div class="dropdown-content">
+      <label>Height</label><input id = "hin" value="4"></input>
+      
+      <label>Width</label><input id = "win" value="5"></input>
+    <br>
+    <button id = "bsettings" onclick = "webViewSetup()">Resize</button>
+    </div>  
   </div>
-  <table id="main"></table>
+
+  
+  <h1>Minesweeper Solver!</h1>
+
+    <h3>Grid Setup</h3>
+
+    <button onclick="waveSolve()">Solve</button>
+    <button onclick="webViewSetup()">Reset</button>
+    <button onclick="fillZeros()">Bucket Zeroes</button>
+    <br>
+    <br>    
+  <table id="main">
+    
+  </table>
+
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
   
   <script src="script.js"></script>
 </body>
