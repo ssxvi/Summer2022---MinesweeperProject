@@ -149,7 +149,7 @@ class Land {
 
 //functions
 
-//fills grid w/ 2d array of land
+//fills and returns a grid w/ 2d array of land
 function setGrid(xn, yn) {
 
   tGrid = [];
@@ -177,14 +177,14 @@ function importGrid(xn, yn, array){
   
 }
 
-//Returns array 
+//Returns array of neighbouring lands
 function getNeighbours(land) {
 
   let tGrid = [];
   let tX;
   let tY;
 
-  for (i = -1; i <= 1; i++) {
+  for (i = -1; i <= 1; i++) { 
 
     tX = land.x + i;
 
@@ -319,7 +319,7 @@ function solve(grid) {
 
 }
 
-//finds if program needs harder solve
+//finds if program needs harder solve [UNUSED]
 function isDeadlock(grid) {
   if (scrape(grid) == false){
     if (shoopSolve == false){
@@ -333,30 +333,36 @@ function isDeadlock(grid) {
   //if (){}
 }
 
+
+
 //soft solve
+/*
+almost the bread and butter of the solving algorithm
+scrape will essentially fill in any 1-land solutions. If there is a land that says 2, and has 2 empty neighbours, it will flag both neighbours.
+*/
 function scrape(grid) {
-  let set = getOpenSet(grid);
+  let set = getOpenSet(grid); //gets 'active' squares (empty and neighbours a number)
   let i = 0;
   let scraped = false;
 
 
 
-  while(i < set.length) {
-    let wSqr = set[i];
+  while(i < set.length) { //loops through every 'active' square
+    let wSqr = set[i]; 
 
     //print test value
-    console.log("Test: x-" + wSqr.x + " y-" + wSqr.y);
-    console.log("value - " +  wSqr.number + " adj empty - " + wSqr.getAdjProperty('e').length + " adj flagged - " + wSqr.getAdjProperty('f').length );
+    //console.log("Test: x-" + wSqr.x + " y-" + wSqr.y);
+    //console.log("value - " +  wSqr.number + " adj empty - " + wSqr.getAdjProperty('e').length + " adj flagged - " + wSqr.getAdjProperty('f').length );
 
 
-    //flag if
+    //flags if empty + flag
     if (wSqr.number == (wSqr.getAdjProperty('e').length +   wSqr.getAdjProperty('f').length)){
      
       for (let l of wSqr.getAdjProperty('e')){
         l.flag();
         scraped = true;
       
-        console.log("flagged: x-" + l.x + " y-" + l.y);
+      //  console.log("flagged: x-" + l.x + " y-" + l.y);
       }
 
   //guess if
@@ -366,7 +372,7 @@ function scrape(grid) {
        l.guess();
        scraped = true;
 
-        console.log("guessed: x-" + l.x + " y-" + l.y);
+        //console.log("guessed: x-" + l.x + " y-" + l.y);
      }   
    }
 

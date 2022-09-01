@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 
 <head>
@@ -26,17 +26,28 @@
   
   <h1>Minesweeper Solver!</h1>
 
-    <h3>Grid Setup</h3>
+  
+  <div>
+    <h4>HOW TO USE</h4>
+    <p>Input a Valid Minesweeper Board below, then click solve! Reset will clear all numbers from the board. Bucket Zeroes will cause any 0's to cascade and spread to all adjacent empty squares. </p>
+    
+    <p>Board size can be adjusted in settings, if your board has no guarenteed flags or bombs, there will be no change.</p>
+  </div>
 
-    <button onclick="waveSolve()">Solve</button>
+  
+  <div>
+    
+    <button class = "buttonDiv"onclick="waveSolve()">Solve</button>
     <button onclick="webViewSetup()">Reset</button>
     <button onclick="fillZeros()">Bucket Zeroes</button>
-    <br>
-    <br>    
-  <table id="main">
     
-  </table>
+  </div>
+    
+    <br>    
+  
+  <table id="main"></table>
 
+  <!--- please never look at this --->
   <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
   
   <script src="script.js"></script>
